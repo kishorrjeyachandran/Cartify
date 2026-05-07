@@ -5,18 +5,26 @@ import {
   useState,
 } from "react";
 
-const CartContext = createContext();
+import toast from "react-hot-toast";
+
+const CartContext =
+  createContext();
 
 export const CartProvider = ({
   children,
 }) => {
-  const [cartItems, setCartItems] =
+  const [cartItems,
+    setCartItems] =
     useState(() => {
       const storedCart =
-        localStorage.getItem("cart");
+        localStorage.getItem(
+          "cart"
+        );
 
       return storedCart
-        ? JSON.parse(storedCart)
+        ? JSON.parse(
+            storedCart
+          )
         : [];
     });
 
@@ -24,24 +32,33 @@ export const CartProvider = ({
   useEffect(() => {
     localStorage.setItem(
       "cart",
-      JSON.stringify(cartItems)
+      JSON.stringify(
+        cartItems
+      )
     );
   }, [cartItems]);
 
   /* ADD */
-  const addToCart = (product) => {
-    const exists = cartItems.find(
-      (item) => item._id === product._id
-    );
+  const addToCart = (
+    product
+  ) => {
+    const exists =
+      cartItems.find(
+        (item) =>
+          item._id ===
+          product._id
+      );
 
     if (exists) {
       setCartItems((prev) =>
         prev.map((item) =>
-          item._id === product._id
+          item._id ===
+          product._id
             ? {
                 ...item,
                 quantity:
-                  item.quantity + 1,
+                  item.quantity +
+                  1,
               }
             : item
         )
@@ -55,26 +72,40 @@ export const CartProvider = ({
         },
       ]);
     }
+
+    toast.success(
+      "Added to cart"
+    );
   };
 
   /* REMOVE */
-  const removeFromCart = (id) => {
+  const removeFromCart = (
+    id
+  ) => {
     setCartItems((prev) =>
       prev.filter(
-        (item) => item._id !== id
+        (item) =>
+          item._id !== id
       )
+    );
+
+    toast.success(
+      "Removed from cart"
     );
   };
 
   /* INCREASE */
-  const increaseQuantity = (id) => {
+  const increaseQuantity = (
+    id
+  ) => {
     setCartItems((prev) =>
       prev.map((item) =>
         item._id === id
           ? {
               ...item,
               quantity:
-                item.quantity + 1,
+                item.quantity +
+                1,
             }
           : item
       )
@@ -82,15 +113,19 @@ export const CartProvider = ({
   };
 
   /* DECREASE */
-  const decreaseQuantity = (id) => {
+  const decreaseQuantity = (
+    id
+  ) => {
     setCartItems((prev) =>
       prev.map((item) =>
         item._id === id
           ? {
               ...item,
               quantity:
-                item.quantity > 1
-                  ? item.quantity - 1
+                item.quantity >
+                1
+                  ? item.quantity -
+                    1
                   : 1,
             }
           : item
@@ -101,6 +136,10 @@ export const CartProvider = ({
   /* CLEAR */
   const clearCart = () => {
     setCartItems([]);
+
+    toast.success(
+      "Cart cleared"
+    );
   };
 
   return (

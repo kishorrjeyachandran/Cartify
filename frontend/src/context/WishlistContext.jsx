@@ -5,6 +5,8 @@ import {
   useState,
 } from "react";
 
+import toast from "react-hot-toast";
+
 const WishlistContext =
   createContext();
 
@@ -55,11 +57,19 @@ export const WishlistProvider = ({
             product._id
         )
       );
+
+      toast.success(
+        "Removed from wishlist"
+      );
     } else {
       setWishlistItems((prev) => [
         ...prev,
         product,
       ]);
+
+      toast.success(
+        "Added to wishlist"
+      );
     }
   };
 
@@ -86,4 +96,6 @@ export const WishlistProvider = ({
 };
 
 export const useWishlist = () =>
-  useContext(WishlistContext);
+  useContext(
+    WishlistContext
+  );

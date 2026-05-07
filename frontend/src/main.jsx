@@ -6,6 +6,8 @@ import {
   BrowserRouter,
 } from "react-router-dom";
 
+import { Toaster } from "react-hot-toast";
+
 import App from "./App";
 
 import "./index.css";
@@ -30,6 +32,19 @@ ReactDOM.createRoot(
       <AuthProvider>
         <WishlistProvider>
           <CartProvider>
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                style: {
+                  background:
+                    "#111214",
+                  color: "#fff",
+                  border:
+                    "1px solid #1F1F22",
+                },
+              }}
+            />
+
             <App />
           </CartProvider>
         </WishlistProvider>
