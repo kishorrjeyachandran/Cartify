@@ -4,7 +4,7 @@ import {
 } from "react";
 
 import { Link } from "react-router-dom";
-
+import HeroSlider from "../components/HeroSlider";
 import {
   ArrowRight,
   ShoppingBag,
@@ -33,7 +33,11 @@ import {
 import {
   useCart,
 } from "../context/CartContext";
+import toast from "react-hot-toast";
 
+import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "../context/AuthContext";
 const slides = [
   {
     title:
@@ -64,6 +68,11 @@ const slides = [
 ];
 
 const Home = () => {
+  const navigate =
+  useNavigate();
+
+const { user } =
+  useAuth();
   const [products, setProducts] =
     useState([]);
 
@@ -92,101 +101,10 @@ const Home = () => {
   return (
     <MainLayout>
       {/* HERO */}
-      <section className="py-10">
-        
-        <Swiper
-          modules={[
-            Autoplay,
-            Pagination,
-          ]}
-          autoplay={{
-            delay: 4000,
-          }}
-          pagination={{
-            clickable: true,
-          }}
-          loop
-          className="rounded-[40px] overflow-hidden"
-        >
-          
-          {slides.map(
-            (slide, index) => (
-              <SwiperSlide
-                key={index}
-              >
-                <div className="relative h-[650px]">
-                  
-                  {/* IMAGE */}
-                  <img
-                    src={slide.image}
-                    alt={slide.title}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-
-                  {/* OVERLAY */}
-                  <div className="absolute inset-0 bg-black/55" />
-
-                  {/* CONTENT */}
-                  <div className="relative z-10 h-full flex items-center px-8 md:px-20">
-                    
-                    <div className="max-w-2xl">
-                      
-                      <div className="flex items-center gap-2 mb-6">
-                        
-                        <Star
-                          size={18}
-                          className="fill-yellow-400 text-yellow-400"
-                        />
-
-                        <span className="text-sm text-zinc-300">
-                          Premium Ecommerce Experience
-                        </span>
-                      </div>
-
-                      <h1 className="text-5xl md:text-7xl font-semibold leading-tight tracking-tight mb-6">
-                        {
-                          slide.title
-                        }
-                      </h1>
-
-                      <p className="text-lg md:text-xl text-zinc-300 leading-8 mb-10">
-                        {
-                          slide.subtitle
-                        }
-                      </p>
-
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        
-                        <Link
-                          to="/shop"
-                          className="h-14 px-7 rounded-2xl bg-white text-black font-medium flex items-center justify-center gap-2 hover:opacity-90 transition"
-                        >
-                          Shop Now
-
-                          <ArrowRight
-                            size={18}
-                          />
-                        </Link>
-
-                        <Link
-                          to="/wishlist"
-                          className="h-14 px-7 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl flex items-center justify-center gap-2 hover:bg-white/20 transition"
-                        >
-                          Wishlist
-
-                          <ShoppingBag
-                            size={18}
-                          />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </SwiperSlide>
-            )
-          )}
-        </Swiper>
-      </section>
+     
+<section className="py-10">
+  <HeroSlider />
+</section>
 
       {/* FEATURES */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 py-20">
@@ -316,11 +234,19 @@ const Home = () => {
                 <div className="px-6 pb-6">
                   
                   <button
-                    onClick={() =>
-                      addToCart(
-                        product
-                      )
-                    }
+                    onClick={() => {
+  if (!user) {
+    toast.error(
+      "Please login first"
+    );
+
+    navigate("/login");
+
+    return;
+  }
+
+  addToCart(product);
+}}
                     className="w-full h-11 rounded-xl bg-white text-black text-sm font-medium hover:opacity-90 transition"
                   >
                     Add To Cart

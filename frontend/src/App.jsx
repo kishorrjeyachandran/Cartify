@@ -6,6 +6,7 @@ import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
+import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import Orders from "./pages/Orders";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -37,6 +38,11 @@ function App() {
         path="/cart"
         element={<Cart />}
       />
+
+      <Route
+  path="/profile"
+  element={<Profile />}
+/>
 
       {/* CHECKOUT */}
       <Route

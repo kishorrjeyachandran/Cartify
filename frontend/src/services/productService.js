@@ -1,19 +1,24 @@
-import API from "./api";
+import axios from "axios";
 
-export const getProducts = async () => {
-  const { data } = await API.get(
-    "/products"
-  );
+const API =
+  "http://localhost:5000/api/products";
 
-  return data;
-};
+/* GET PRODUCTS */
+export const getProducts =
+  async () => {
+    const { data } =
+      await axios.get(API);
 
-export const getProductById = async (
-  id
-) => {
-  const { data } = await API.get(
-    `/products/${id}`
-  );
+    return data;
+  };
 
-  return data;
-};
+/* GET PRODUCT */
+export const getProductById =
+  async (id) => {
+    const { data } =
+      await axios.get(
+        `${API}/${id}`
+      );
+
+    return data;
+  };

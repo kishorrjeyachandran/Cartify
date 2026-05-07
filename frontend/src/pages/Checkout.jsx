@@ -1,88 +1,280 @@
-import { useState } from "react";
-
-import { useNavigate } from "react-router-dom";
-
-import MainLayout from "../layouts/MainLayout";
+import {
+  useState,
+  useEffect,
+} from "react";
 
 import {
-  CreditCard,
-  Lock,
-  Truck,
-} from "lucide-react";
+  useNavigate,
+} from "react-router-dom";
+
+import MainLayout from "../layouts/MainLayout";
 
 import { useCart } from "../context/CartContext";
 
 import { useAuth } from "../context/AuthContext";
 
-import { createOrder } from "../services/orderService";
+import toast from "react-hot-toast";
 
 const Checkout = () => {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
-  const { cartItems, clearCart } =
-    useCart();
+  const { user } =
+    useAuth();
 
-  const { user } = useAuth();
+  const {
+    cartItems,
+    clearCart,
+  } = useCart();
 
-  const [loading, setLoading] =
+  const [loading,
+    setLoading] =
     useState(false);
 
+  const [showPayment,
+    setShowPayment] =
+    useState(false);
+
+  /* SHIPPING FORM */
+  const [formData,
+    setFormData] =
+    useState({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      address: "",
+      city: "",
+      postalCode: "",
+    });
+
+  /* PAYMENT FORM */
+  const [paymentData,
+    setPaymentData] =
+    useState({
+      cardName: "",
+      cardNumber: "",
+      expiry: "",
+      cvv: "",
+    });
+
+  /* PROTECT PAGE */
+  useEffect(() => {
+    if (!user) {
+      toast.error(
+        "Please login first"
+      );
+
+      navigate("/login");
+    }
+  }, [user, navigate]);
+
+  /* SHIPPING INPUT */
+  const handleChange = (
+    e
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]:
+        e.target.value,
+    });
+  };
+
+  /* PAYMENT INPUT */
+  const handlePaymentChange =
+    (e) => {
+      setPaymentData({
+        ...paymentData,
+        [e.target.name]:
+          e.target.value,
+      });
+    };
+
+  /* TOTAL */
   const subtotal = cartItems.reduce(
     (acc, item) =>
       acc +
-      item.price * item.quantity,
+      item.price *
+        item.quantity,
     0
   );
 
+  const total =
+    subtotal + 20;
+
+  /* OPEN PAYMENT */
   const handleCheckout =
-    async () => {
-      if (!user) {
-        alert(
-          "Please login first"
+    (e) => {
+      e.preventDefault();
+
+      const {
+        firstName,
+        lastName,
+        email,
+        phone,
+        address,
+        city,
+        postalCode,
+      } = formData;
+
+      if (
+        !firstName ||
+        !lastName ||
+        !email ||
+        !phone ||
+        !address ||
+        !city ||
+        !postalCode
+      ) {
+        toast.error(
+          "Please fill all fields"
         );
 
-        return navigate("/login");
+        return;
       }
 
+      const emailRegex =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (
+        !emailRegex.test(
+          email
+        )
+      ) {
+        toast.error(
+          "Invalid email address"
+        );
+
+        return;
+      }
+
+      if (
+        phone.length < 10
+      ) {
+        toast.error(
+          "Invalid phone number"
+        );
+
+        return;
+      }
+
+      setShowPayment(true);
+    };
+
+  /* SAVE ORDER */
+  const saveOrder =
+    async (
+      paymentMethod
+    ) => {
       try {
-        setLoading(true);
+        const token =
+          localStorage.getItem(
+            "token"
+          );
 
-        const orderData = {
-          products: cartItems.map(
-            (item) => ({
-              product: item._id,
-              quantity:
-                item.quantity,
-            })
-          ),
+        await fetch(
+          "http://localhost:5000/api/orders",
+          {
+            method: "POST",
 
-          totalPrice:
-            subtotal + 20,
-        };
+            headers: {
+              "Content-Type":
+                "application/json",
 
-        await createOrder(
-          orderData,
-          user.token
+              Authorization: `Bearer ${token}`,
+            },
+
+            body: JSON.stringify({
+              products:
+                cartItems.map(
+                  (
+                    item
+                  ) => ({
+                    product:
+                      item._id,
+
+                    quantity:
+                      item.quantity,
+                  })
+                ),
+
+              totalPrice:
+                total,
+
+              paymentMethod,
+
+              status:
+                "Pending",
+            }),
+          }
+        );
+
+        toast.success(
+          "Order placed successfully!"
         );
 
         clearCart();
-
-        alert(
-          "Order placed successfully"
-        );
 
         navigate("/orders");
       } catch (error) {
         console.log(error);
 
-        alert(
-          error.response?.data
-            ?.message ||
-            "Checkout failed"
+        toast.error(
+          "Order failed"
         );
-      } finally {
-        setLoading(false);
       }
+    };
+
+  /* CARD PAYMENT */
+  const completePayment =
+    async () => {
+      const {
+        cardName,
+        cardNumber,
+        expiry,
+        cvv,
+      } = paymentData;
+
+      if (
+        !cardName ||
+        !cardNumber ||
+        !expiry ||
+        !cvv
+      ) {
+        toast.error(
+          "Please fill payment details"
+        );
+
+        return;
+      }
+
+      if (
+        cardNumber.length <
+        16
+      ) {
+        toast.error(
+          "Invalid card number"
+        );
+
+        return;
+      }
+
+      setLoading(true);
+
+      setTimeout(
+        async () => {
+          await saveOrder(
+            "Card"
+          );
+
+          setLoading(false);
+
+          setShowPayment(
+            false
+          );
+        },
+        2000
+      );
     };
 
   return (
@@ -103,170 +295,175 @@ const Checkout = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-10">
           
-          {/* LEFT */}
-          <div className="space-y-10">
+          {/* FORM */}
+          <form
+            onSubmit={
+              handleCheckout
+            }
+            className="space-y-8"
+          >
             
-            {/* SHIPPING */}
-            <div className="rounded-3xl border border-[#1F1F22] bg-[#111214] p-8">
+            <div className="p-8 rounded-3xl border border-[#1F1F22] bg-[#111214]">
               
-              <div className="flex items-center gap-3 mb-8">
-                <Truck size={22} />
-
-                <h2 className="text-2xl font-semibold">
-                  Shipping Information
-                </h2>
-              </div>
+              <h2 className="text-3xl font-semibold mb-8">
+                Shipping Information
+              </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 
                 <input
                   type="text"
+                  name="firstName"
+                  value={
+                    formData.firstName
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="First Name"
-                  className="h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none"
+                  className="h-14 rounded-2xl bg-[#0B0B0C] border border-[#1F1F22] px-5 outline-none"
                 />
 
                 <input
                   type="text"
+                  name="lastName"
+                  value={
+                    formData.lastName
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="Last Name"
-                  className="h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none"
+                  className="h-14 rounded-2xl bg-[#0B0B0C] border border-[#1F1F22] px-5 outline-none"
                 />
 
                 <input
                   type="email"
+                  name="email"
+                  value={
+                    formData.email
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="Email Address"
-                  className="md:col-span-2 h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none"
+                  className="md:col-span-2 h-14 rounded-2xl bg-[#0B0B0C] border border-[#1F1F22] px-5 outline-none"
                 />
 
                 <input
                   type="text"
+                  name="phone"
+                  value={
+                    formData.phone
+                  }
+                  onChange={
+                    handleChange
+                  }
+                  placeholder="Phone Number"
+                  className="md:col-span-2 h-14 rounded-2xl bg-[#0B0B0C] border border-[#1F1F22] px-5 outline-none"
+                />
+
+                <input
+                  type="text"
+                  name="address"
+                  value={
+                    formData.address
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="Street Address"
-                  className="md:col-span-2 h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none"
+                  className="md:col-span-2 h-14 rounded-2xl bg-[#0B0B0C] border border-[#1F1F22] px-5 outline-none"
                 />
 
                 <input
                   type="text"
+                  name="city"
+                  value={
+                    formData.city
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="City"
-                  className="h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none"
+                  className="h-14 rounded-2xl bg-[#0B0B0C] border border-[#1F1F22] px-5 outline-none"
                 />
 
                 <input
                   type="text"
-                  placeholder="ZIP Code"
-                  className="h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none"
+                  name="postalCode"
+                  value={
+                    formData.postalCode
+                  }
+                  onChange={
+                    handleChange
+                  }
+                  placeholder="Postal Code"
+                  className="h-14 rounded-2xl bg-[#0B0B0C] border border-[#1F1F22] px-5 outline-none"
                 />
               </div>
             </div>
+          </form>
 
-            {/* PAYMENT */}
-            <div className="rounded-3xl border border-[#1F1F22] bg-[#111214] p-8">
-              
-              <div className="flex items-center gap-3 mb-8">
-                <CreditCard size={22} />
-
-                <h2 className="text-2xl font-semibold">
-                  Payment Details
-                </h2>
-              </div>
-
-              <div className="space-y-5">
-                
-                <input
-                  type="text"
-                  placeholder="Cardholder Name"
-                  className="w-full h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none"
-                />
-
-                <input
-                  type="text"
-                  placeholder="Card Number"
-                  className="w-full h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none"
-                />
-
-                <div className="grid grid-cols-2 gap-5">
-                  
-                  <input
-                    type="text"
-                    placeholder="MM/YY"
-                    className="h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none"
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="CVV"
-                    className="h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT */}
+          {/* SUMMARY */}
           <div className="h-fit rounded-3xl border border-[#1F1F22] bg-[#111214] p-8 sticky top-24">
             
             <h2 className="text-3xl font-semibold mb-8">
               Order Summary
             </h2>
 
-            {/* ITEMS */}
-            <div className="space-y-5 mb-8">
+            <div className="space-y-5 border-b border-[#1F1F22] pb-6 mb-6">
               
-              {cartItems.map((item) => (
-                <div
-                  key={item._id}
-                  className="flex items-center gap-4"
-                >
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden bg-white">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-contain p-2"
-                    />
+              {cartItems.map(
+                (item) => (
+                  <div
+                    key={item._id}
+                    className="flex items-center justify-between gap-4"
+                  >
+                    
+                    <div className="flex items-center gap-4">
+                      
+                      <img
+                        src={
+                          item.image
+                        }
+                        alt={
+                          item.name
+                        }
+                        className="w-16 h-16 rounded-xl bg-white object-contain p-2"
+                      />
+
+                      <div>
+                        
+                        <h3 className="font-medium">
+                          {
+                            item.name
+                          }
+                        </h3>
+
+                        <p className="text-sm text-zinc-500">
+                          Qty:
+                          {
+                            item.quantity
+                          }
+                        </p>
+                      </div>
+                    </div>
+
+                    <span>
+                      $
+                      {(
+                        item.price *
+                        item.quantity
+                      ).toFixed(
+                        2
+                      )}
+                    </span>
                   </div>
-
-                  <div className="flex-1">
-                    <h3 className="font-medium line-clamp-1">
-                      {item.name}
-                    </h3>
-
-                    <p className="text-sm text-zinc-500">
-                      Qty: {item.quantity}
-                    </p>
-                  </div>
-
-                  <span className="font-medium">
-                    $
-                    {item.price *
-                      item.quantity}
-                  </span>
-                </div>
-              ))}
+                )
+              )}
             </div>
 
-            {/* TOTALS */}
-            <div className="space-y-5 border-y border-[#1F1F22] py-6 mb-6">
-              
-              <div className="flex items-center justify-between text-zinc-400">
-                <span>Subtotal</span>
-
-                <span>
-                  ${subtotal}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between text-zinc-400">
-                <span>Shipping</span>
-
-                <span>Free</span>
-              </div>
-
-              <div className="flex items-center justify-between text-zinc-400">
-                <span>Tax</span>
-
-                <span>$20</span>
-              </div>
-            </div>
-
-            {/* TOTAL */}
             <div className="flex items-center justify-between mb-8">
               
               <span className="text-lg text-zinc-400">
@@ -274,32 +471,161 @@ const Checkout = () => {
               </span>
 
               <span className="text-3xl font-semibold">
-                ${subtotal + 20}
+                $
+                {total.toFixed(
+                  2
+                )}
               </span>
             </div>
 
-            {/* BUTTON */}
             <button
-              onClick={handleCheckout}
-              disabled={
-                loading ||
-                cartItems.length === 0
+              onClick={
+                handleCheckout
               }
-              className="w-full h-14 rounded-2xl bg-white text-black font-medium hover:opacity-90 transition disabled:opacity-50"
+              className="w-full h-14 rounded-2xl bg-white text-black font-medium hover:opacity-90 transition"
             >
-              {loading
-                ? "Processing..."
-                : "Complete Purchase"}
+              Proceed To Payment
             </button>
-
-            {/* SECURITY */}
-            <div className="flex items-center justify-center gap-2 mt-6 text-sm text-zinc-500">
-              <Lock size={16} />
-              Secure SSL encrypted checkout
-            </div>
           </div>
         </div>
       </section>
+
+      {/* PAYMENT MODAL */}
+      {showPayment && (
+        <div className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-5">
+          
+          <div className="w-full max-w-lg rounded-[32px] border border-[#1F1F22] bg-[#111214] p-8">
+            
+            <div className="flex items-center justify-between mb-8">
+              
+              <div>
+                
+                <p className="text-sm text-zinc-500 mb-2">
+                  PAYMENT
+                </p>
+
+                <h2 className="text-3xl font-semibold">
+                  Choose Payment Method
+                </h2>
+              </div>
+
+              <button
+                onClick={() =>
+                  setShowPayment(
+                    false
+                  )
+                }
+                className="w-10 h-10 rounded-xl border border-[#1F1F22] bg-[#151618]"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* COD */}
+            <button
+              onClick={async () => {
+                setLoading(true);
+
+                await saveOrder(
+                  "Cash On Delivery"
+                );
+
+                setLoading(false);
+
+                setShowPayment(
+                  false
+                );
+              }}
+              className="w-full h-14 rounded-2xl bg-green-500 text-white font-medium hover:opacity-90 transition mb-6"
+            >
+              Cash On Delivery
+            </button>
+
+            {/* DIVIDER */}
+            <div className="flex items-center gap-4 mb-6">
+              
+              <div className="flex-1 h-px bg-[#1F1F22]" />
+
+              <span className="text-sm text-zinc-500">
+                OR PAY BY CARD
+              </span>
+
+              <div className="flex-1 h-px bg-[#1F1F22]" />
+            </div>
+
+            {/* CARD FORM */}
+            <div className="space-y-5">
+              
+              <input
+                type="text"
+                name="cardName"
+                value={
+                  paymentData.cardName
+                }
+                onChange={
+                  handlePaymentChange
+                }
+                placeholder="Card Holder Name"
+                className="w-full h-14 rounded-2xl bg-[#0B0B0C] border border-[#1F1F22] px-5 outline-none"
+              />
+
+              <input
+                type="text"
+                name="cardNumber"
+                value={
+                  paymentData.cardNumber
+                }
+                onChange={
+                  handlePaymentChange
+                }
+                placeholder="1234 5678 9012 3456"
+                className="w-full h-14 rounded-2xl bg-[#0B0B0C] border border-[#1F1F22] px-5 outline-none"
+              />
+
+              <div className="grid grid-cols-2 gap-5">
+                
+                <input
+                  type="text"
+                  name="expiry"
+                  value={
+                    paymentData.expiry
+                  }
+                  onChange={
+                    handlePaymentChange
+                  }
+                  placeholder="MM/YY"
+                  className="h-14 rounded-2xl bg-[#0B0B0C] border border-[#1F1F22] px-5 outline-none"
+                />
+
+                <input
+                  type="password"
+                  name="cvv"
+                  value={
+                    paymentData.cvv
+                  }
+                  onChange={
+                    handlePaymentChange
+                  }
+                  placeholder="CVV"
+                  className="h-14 rounded-2xl bg-[#0B0B0C] border border-[#1F1F22] px-5 outline-none"
+                />
+              </div>
+
+              <button
+                onClick={
+                  completePayment
+                }
+                disabled={loading}
+                className="w-full h-14 rounded-2xl bg-white text-black font-medium hover:opacity-90 transition"
+              >
+                {loading
+                  ? "Processing..."
+                  : "Complete Purchase"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 };

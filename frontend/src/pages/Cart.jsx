@@ -1,4 +1,7 @@
+import { Link, useNavigate } from "react-router-dom";
+
 import MainLayout from "../layouts/MainLayout";
+
 import {
   Minus,
   Plus,
@@ -9,6 +12,8 @@ import {
 
 import { useCart } from "../context/CartContext";
 
+import { useAuth } from "../context/AuthContext";
+
 const Cart = () => {
   const {
     cartItems,
@@ -16,6 +21,12 @@ const Cart = () => {
     increaseQuantity,
     decreaseQuantity,
   } = useCart();
+
+  const { user } =
+    useAuth();
+
+  const navigate =
+    useNavigate();
 
   const subtotal = cartItems.reduce(
     (acc, item) =>
@@ -29,6 +40,7 @@ const Cart = () => {
         
         {/* HEADER */}
         <div className="mb-12">
+          
           <p className="text-sm text-zinc-500 mb-3">
             CART
           </p>
@@ -43,6 +55,7 @@ const Cart = () => {
           <div className="rounded-3xl border border-[#1F1F22] bg-[#111214] py-24 px-6 text-center">
             
             <div className="w-20 h-20 rounded-full bg-[#151618] flex items-center justify-center mx-auto mb-6">
+              
               <ShoppingBag size={32} />
             </div>
 
@@ -52,16 +65,17 @@ const Cart = () => {
 
             <p className="text-zinc-500 max-w-md mx-auto leading-7 mb-8">
               Looks like you haven’t added any products yet.
-              Start exploring modern premium collections.
+              Start exploring premium collections.
             </p>
 
-            <a
-              href="/shop"
+            <Link
+              to="/shop"
               className="inline-flex items-center gap-2 h-12 px-6 rounded-2xl bg-white text-black font-medium hover:opacity-90 transition"
             >
               Continue Shopping
+
               <ArrowRight size={18} />
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-10">
@@ -71,17 +85,19 @@ const Cart = () => {
               
               {cartItems.map((item) => (
                 <div
-                  key={item.id}
+                  key={item._id}
                   className="rounded-3xl border border-[#1F1F22] bg-[#111214] p-5"
                 >
+                  
                   <div className="flex flex-col sm:flex-row gap-5">
                     
                     {/* IMAGE */}
-                    <div className="w-full sm:w-[180px] h-[180px] rounded-2xl overflow-hidden">
+                    <div className="w-full sm:w-[180px] h-[180px] rounded-2xl overflow-hidden bg-white">
+                      
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain p-4"
                       />
                     </div>
 
@@ -89,7 +105,8 @@ const Cart = () => {
                     <div className="flex-1 flex flex-col justify-between">
                       
                       <div>
-                        <p className="text-sm text-zinc-500 mb-2">
+                        
+                        <p className="text-sm text-zinc-500 mb-2 capitalize">
                           {item.category}
                         </p>
 
@@ -110,7 +127,7 @@ const Cart = () => {
                           
                           <button
                             onClick={() =>
-                              decreaseQuantity(item.id)
+                              decreaseQuantity(item._id)
                             }
                             className="w-10 h-10 rounded-xl border border-[#1F1F22] bg-[#151618] flex items-center justify-center hover:border-zinc-700 transition"
                           >
@@ -123,7 +140,7 @@ const Cart = () => {
 
                           <button
                             onClick={() =>
-                              increaseQuantity(item.id)
+                              increaseQuantity(item._id)
                             }
                             className="w-10 h-10 rounded-xl border border-[#1F1F22] bg-[#151618] flex items-center justify-center hover:border-zinc-700 transition"
                           >
@@ -134,7 +151,7 @@ const Cart = () => {
                         {/* REMOVE */}
                         <button
                           onClick={() =>
-                            removeFromCart(item.id)
+                            removeFromCart(item._id)
                           }
                           className="w-10 h-10 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500/20 transition"
                         >
@@ -158,17 +175,25 @@ const Cart = () => {
               <div className="space-y-5 border-b border-[#1F1F22] pb-6 mb-6">
                 
                 <div className="flex items-center justify-between text-zinc-400">
+                  
                   <span>Subtotal</span>
-                  <span>${subtotal}</span>
+
+                  <span>
+                    ${subtotal.toFixed(2)}
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-between text-zinc-400">
+                  
                   <span>Shipping</span>
+
                   <span>Free</span>
                 </div>
 
                 <div className="flex items-center justify-between text-zinc-400">
+                  
                   <span>Tax</span>
+
                   <span>$20</span>
                 </div>
               </div>
@@ -181,15 +206,30 @@ const Cart = () => {
                 </span>
 
                 <span className="text-3xl font-semibold">
-                  ${subtotal + 20}
+                  ${(subtotal + 20).toFixed(2)}
                 </span>
               </div>
 
-              {/* BUTTON */}
-              <button className="w-full h-14 rounded-2xl bg-white text-black font-medium flex items-center justify-center gap-2 hover:opacity-90 transition">
-                Proceed To Checkout
-                <ArrowRight size={18} />
-              </button>
+              {/* CHECKOUT */}
+              {user ? (
+                <Link
+                  to="/checkout"
+                  className="w-full h-14 rounded-2xl bg-white text-black font-medium flex items-center justify-center gap-2 hover:opacity-90 transition"
+                >
+                  Proceed To Checkout
+
+                  <ArrowRight size={18} />
+                </Link>
+              ) : (
+                <button
+                  onClick={() =>
+                    navigate("/login")
+                  }
+                  className="w-full h-14 rounded-2xl bg-red-500 text-white font-medium hover:opacity-90 transition"
+                >
+                  Login To Checkout
+                </button>
+              )}
 
               {/* NOTE */}
               <p className="text-sm text-zinc-500 leading-7 mt-6 text-center">

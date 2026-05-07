@@ -1,6 +1,12 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
-import { Link } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
 
 import {
   ShoppingBag,
@@ -10,6 +16,7 @@ import {
   LayoutDashboard,
   Menu,
   X,
+  Search,
 } from "lucide-react";
 
 import { useCart } from "../context/CartContext";
@@ -17,6 +24,10 @@ import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 
 import { useAuth } from "../context/AuthContext";
+
+import {
+  getProducts,
+} from "../services/productService";
 
 const Navbar = () => {
   const { cartItems } = useCart();
@@ -27,15 +38,72 @@ const Navbar = () => {
   const { user, logout } =
     useAuth();
 
+  const navigate =
+    useNavigate();
+
   const [menuOpen, setMenuOpen] =
     useState(false);
+
+  const [search,
+    setSearch] =
+    useState("");
+
+  const [products,
+    setProducts] =
+    useState([]);
+
+  const [filteredProducts,
+    setFilteredProducts] =
+    useState([]);
+
+  /* FETCH PRODUCTS */
+  useEffect(() => {
+    const fetchProducts =
+      async () => {
+        try {
+          const data =
+            await getProducts();
+
+          setProducts(data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
+    fetchProducts();
+  }, []);
+
+  /* LIVE SEARCH */
+  useEffect(() => {
+    if (!search.trim()) {
+      setFilteredProducts(
+        []
+      );
+
+      return;
+    }
+
+    const filtered =
+      products.filter(
+        (product) =>
+          product.name
+            .toLowerCase()
+            .includes(
+              search.toLowerCase()
+            )
+      );
+
+    setFilteredProducts(
+      filtered.slice(0, 5)
+    );
+  }, [search, products]);
 
   return (
     <>
       {/* HEADER */}
       <header className="sticky top-0 z-50 border-b border-[#1F1F22] bg-[#0B0B0C]/80 backdrop-blur-xl">
         
-        <nav className="max-w-7xl mx-auto px-5 h-20 flex items-center justify-between">
+        <nav className="max-w-7xl mx-auto px-5 h-20 flex items-center justify-between gap-5">
           
           {/* LEFT */}
           <div className="flex items-center gap-4">
@@ -57,6 +125,86 @@ const Navbar = () => {
             >
               Cartify
             </Link>
+          </div>
+
+          {/* SEARCH */}
+          <div className="hidden lg:block relative flex-1 max-w-xl">
+            
+            <div className="relative">
+              
+              <Search
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
+              />
+
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={search}
+                onChange={(e) =>
+                  setSearch(
+                    e.target.value
+                  )
+                }
+                className="w-full h-12 rounded-2xl bg-[#111214] border border-[#1F1F22] pl-12 pr-4 outline-none focus:border-zinc-700"
+              />
+            </div>
+
+            {/* DROPDOWN */}
+            {filteredProducts.length >
+              0 && (
+              <div className="absolute top-14 left-0 w-full rounded-3xl border border-[#1F1F22] bg-[#111214] overflow-hidden shadow-2xl">
+                
+                {filteredProducts.map(
+                  (product) => (
+                    <button
+                      key={
+                        product._id
+                      }
+                      onClick={() => {
+                        navigate(
+                          `/product/${product._id}`
+                        );
+
+                        setSearch("");
+
+                        setFilteredProducts(
+                          []
+                        );
+                      }}
+                      className="w-full p-4 flex items-center gap-4 hover:bg-[#1A1A1D] transition text-left"
+                    >
+                      
+                      <img
+                        src={
+                          product.image
+                        }
+                        alt={
+                          product.name
+                        }
+                        className="w-14 h-14 object-contain bg-white rounded-xl p-2"
+                      />
+
+                      <div>
+                        
+                        <p className="font-medium line-clamp-1">
+                          {
+                            product.name
+                          }
+                        </p>
+
+                        <p className="text-sm text-zinc-500">
+                          $
+                          {
+                            product.price
+                          }
+                        </p>
+                      </div>
+                    </button>
+                  )
+                )}
+              </div>
+            )}
           </div>
 
           {/* DESKTOP LINKS */}
@@ -151,14 +299,17 @@ const Navbar = () => {
                 )}
 
                 {/* PROFILE */}
-                <div className="hidden md:flex items-center gap-2 px-4 h-11 rounded-2xl border border-[#1F1F22] bg-[#111214]">
+                <Link
+                  to="/profile"
+                  className="hidden md:flex items-center gap-2 px-4 h-11 rounded-2xl border border-[#1F1F22] bg-[#111214] hover:border-zinc-700 transition"
+                >
                   
                   <User size={18} />
 
                   <span className="text-sm">
                     {user.name}
                   </span>
-                </div>
+                </Link>
 
                 {/* LOGOUT */}
                 <button
@@ -252,6 +403,18 @@ const Navbar = () => {
               Shop
             </Link>
 
+            {user && (
+              <Link
+                to="/profile"
+                onClick={() =>
+                  setMenuOpen(false)
+                }
+                className="h-14 px-5 rounded-2xl bg-[#111214] border border-[#1F1F22] flex items-center"
+              >
+                Profile
+              </Link>
+            )}
+
             <Link
               to="/wishlist"
               onClick={() =>
@@ -294,7 +457,6 @@ const Navbar = () => {
               Orders
             </Link>
 
-            {/* ADMIN */}
             {user?.role ===
               "admin" && (
               <Link
@@ -308,7 +470,6 @@ const Navbar = () => {
               </Link>
             )}
 
-            {/* LOGIN */}
             {!user && (
               <Link
                 to="/login"
@@ -321,7 +482,6 @@ const Navbar = () => {
               </Link>
             )}
 
-            {/* USER */}
             {user && (
               <button
                 onClick={() => {
