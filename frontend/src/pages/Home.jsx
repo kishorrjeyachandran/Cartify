@@ -1,110 +1,336 @@
-import MainLayout from "../layouts/MainLayout";
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
-import FeaturedProducts from "../components/FeaturedProducts";
-import Categories from "../components/Categories";
-import PromoBanner from "../components/PromoBanner";
-import WhyChooseUs from "../components/WhyChooseUs";
+import { Link } from "react-router-dom";
+
+import {
+  ArrowRight,
+  ShoppingBag,
+  Star,
+} from "lucide-react";
+
+import {
+  Swiper,
+  SwiperSlide,
+} from "swiper/react";
+
+import {
+  Autoplay,
+  Pagination,
+} from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/pagination";
+
+import MainLayout from "../layouts/MainLayout";
+
+import {
+  getProducts,
+} from "../services/productService";
+
+import {
+  useCart,
+} from "../context/CartContext";
+
+const slides = [
+  {
+    title:
+      "Discover Premium Fashion",
+    subtitle:
+      "Curated styles for modern lifestyles.",
+    image:
+      "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop",
+  },
+
+  {
+    title:
+      "Upgrade Your Workspace",
+    subtitle:
+      "Minimal tech products built for productivity.",
+    image:
+      "https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=2070&auto=format&fit=crop",
+  },
+
+  {
+    title:
+      "Modern Living Essentials",
+    subtitle:
+      "Premium collections for everyday comfort.",
+    image:
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=2070&auto=format&fit=crop",
+  },
+];
 
 const Home = () => {
+  const [products, setProducts] =
+    useState([]);
+
+  const { addToCart } =
+    useCart();
+
+  /* FETCH PRODUCTS */
+  useEffect(() => {
+    const fetchProducts =
+      async () => {
+        try {
+          const data =
+            await getProducts();
+
+          setProducts(
+            data.slice(0, 6)
+          );
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
+    fetchProducts();
+  }, []);
+
   return (
     <MainLayout>
       {/* HERO */}
-      <section className="min-h-[90vh] flex items-center">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center w-full">
+      <section className="py-10">
+        
+        <Swiper
+          modules={[
+            Autoplay,
+            Pagination,
+          ]}
+          autoplay={{
+            delay: 4000,
+          }}
+          pagination={{
+            clickable: true,
+          }}
+          loop
+          className="rounded-[40px] overflow-hidden"
+        >
           
-          {/* LEFT */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
-            <div className="inline-flex items-center px-4 py-2 rounded-full border border-[#1F1F22] bg-[#111214] text-sm text-zinc-400 mb-8">
-              Modern E-Commerce Experience
-            </div>
+          {slides.map(
+            (slide, index) => (
+              <SwiperSlide
+                key={index}
+              >
+                <div className="relative h-[650px]">
+                  
+                  {/* IMAGE */}
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
 
-            <h1 className="text-5xl md:text-7xl font-semibold leading-tight tracking-tight mb-6">
-              Modern Shopping,
-              <br />
-              Simplified.
-            </h1>
+                  {/* OVERLAY */}
+                  <div className="absolute inset-0 bg-black/55" />
 
-            <p className="text-zinc-400 text-lg leading-8 max-w-xl mb-10">
-              Discover curated products with a fast,
-              seamless shopping experience designed
-              for modern users.
-            </p>
+                  {/* CONTENT */}
+                  <div className="relative z-10 h-full flex items-center px-8 md:px-20">
+                    
+                    <div className="max-w-2xl">
+                      
+                      <div className="flex items-center gap-2 mb-6">
+                        
+                        <Star
+                          size={18}
+                          className="fill-yellow-400 text-yellow-400"
+                        />
 
-            <div className="flex flex-wrap items-center gap-4">
-              
-              <button className="h-12 px-6 rounded-xl bg-white text-black font-medium flex items-center gap-2 hover:opacity-90 transition">
-                Shop Now
-                <ArrowRight size={18} />
-              </button>
+                        <span className="text-sm text-zinc-300">
+                          Premium Ecommerce Experience
+                        </span>
+                      </div>
 
-              <button className="h-12 px-6 rounded-xl border border-[#1F1F22] bg-[#111214] hover:bg-[#151618] transition">
-                Browse Products
-              </button>
-            </div>
-          </motion.div>
+                      <h1 className="text-5xl md:text-7xl font-semibold leading-tight tracking-tight mb-6">
+                        {
+                          slide.title
+                        }
+                      </h1>
 
-          {/* RIGHT */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7 }}
-            className="relative"
-          >
-            {/* Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-zinc-900 to-zinc-800 rounded-[32px]" />
+                      <p className="text-lg md:text-xl text-zinc-300 leading-8 mb-10">
+                        {
+                          slide.subtitle
+                        }
+                      </p>
 
-            {/* Card */}
-            <div className="relative border border-[#1F1F22] bg-[#111214] rounded-[32px] overflow-hidden">
-              
-              <img
-                src="https://images.unsplash.com/photo-1523275335684-37898b6baf30"
-                alt="Watch"
-                className="w-full h-[500px] object-cover"
-              />
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        
+                        <Link
+                          to="/shop"
+                          className="h-14 px-7 rounded-2xl bg-white text-black font-medium flex items-center justify-center gap-2 hover:opacity-90 transition"
+                        >
+                          Shop Now
 
-              <div className="p-6 border-t border-[#1F1F22]">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h2 className="text-2xl font-semibold">
-                      Smart Watch
-                    </h2>
+                          <ArrowRight
+                            size={18}
+                          />
+                        </Link>
 
-                    <p className="text-zinc-500 mt-1">
-                      Series X Collection
-                    </p>
+                        <Link
+                          to="/wishlist"
+                          className="h-14 px-7 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl flex items-center justify-center gap-2 hover:bg-white/20 transition"
+                        >
+                          Wishlist
+
+                          <ShoppingBag
+                            size={18}
+                          />
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-
-                  <span className="text-xl font-medium">
-                    $199
-                  </span>
                 </div>
+              </SwiperSlide>
+            )
+          )}
+        </Swiper>
+      </section>
 
-                <button className="w-full h-12 rounded-xl bg-white text-black font-medium hover:opacity-90 transition">
-                  Add To Cart
-                </button>
-              </div>
-            </div>
-          </motion.div>
+      {/* FEATURES */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 py-20">
+        
+        <div className="p-8 rounded-3xl border border-[#1F1F22] bg-[#111214]">
+          
+          <h3 className="text-2xl font-semibold mb-4">
+            Premium Products
+          </h3>
+
+          <p className="text-zinc-400 leading-7">
+            Carefully selected modern products designed
+            for quality and comfort.
+          </p>
+        </div>
+
+        <div className="p-8 rounded-3xl border border-[#1F1F22] bg-[#111214]">
+          
+          <h3 className="text-2xl font-semibold mb-4">
+            Fast Delivery
+          </h3>
+
+          <p className="text-zinc-400 leading-7">
+            Get your products delivered quickly with
+            secure and reliable shipping.
+          </p>
+        </div>
+
+        <div className="p-8 rounded-3xl border border-[#1F1F22] bg-[#111214]">
+          
+          <h3 className="text-2xl font-semibold mb-4">
+            Secure Payments
+          </h3>
+
+          <p className="text-zinc-400 leading-7">
+            Experience safe and protected transactions
+            across all purchases.
+          </p>
         </div>
       </section>
 
-      {/* CATEGORIES */}
-      <Categories />
-
       {/* FEATURED PRODUCTS */}
-      <FeaturedProducts />
+      <section className="pb-24">
+        
+        {/* HEADER */}
+        <div className="flex items-center justify-between mb-10">
+          
+          <div>
+            <p className="text-sm text-zinc-500 mb-3">
+              FEATURED
+            </p>
 
-      {/* PROMO BANNER */}
-      <PromoBanner />
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight">
+              Trending Products
+            </h2>
+          </div>
 
-      {/* WHY CHOOSE US */}
-      <WhyChooseUs />
+          <Link
+            to="/shop"
+            className="hidden md:flex h-12 px-5 rounded-2xl bg-[#111214] border border-[#1F1F22] items-center gap-2 hover:border-zinc-700 transition"
+          >
+            View All
+
+            <ArrowRight
+              size={18}
+            />
+          </Link>
+        </div>
+
+        {/* PRODUCTS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          
+          {products.map(
+            (product) => (
+              <div
+                key={product._id}
+                className="group rounded-3xl overflow-hidden border border-[#1F1F22] bg-[#111214] hover:border-zinc-700 transition-all"
+              >
+                {/* LINK */}
+                <Link
+                  to={`/product/${product._id}`}
+                >
+                  {/* IMAGE */}
+                  <div className="overflow-hidden bg-white">
+                    
+                    <img
+                      src={
+                        product.image
+                      }
+                      alt={
+                        product.name
+                      }
+                      className="w-full h-[340px] object-contain p-6 group-hover:scale-105 transition duration-500"
+                    />
+                  </div>
+
+                  {/* CONTENT */}
+                  <div className="p-6">
+                    
+                    <div className="flex items-center justify-between gap-5 mb-4">
+                      
+                      <div>
+                        <p className="text-sm text-zinc-500 mb-1 capitalize">
+                          {
+                            product.category
+                          }
+                        </p>
+
+                        <h2 className="text-xl font-medium line-clamp-1">
+                          {
+                            product.name
+                          }
+                        </h2>
+                      </div>
+
+                      <span className="text-lg font-semibold whitespace-nowrap">
+                        $
+                        {
+                          product.price
+                        }
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* BUTTON */}
+                <div className="px-6 pb-6">
+                  
+                  <button
+                    onClick={() =>
+                      addToCart(
+                        product
+                      )
+                    }
+                    className="w-full h-11 rounded-xl bg-white text-black text-sm font-medium hover:opacity-90 transition"
+                  >
+                    Add To Cart
+                  </button>
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      </section>
     </MainLayout>
   );
 };
