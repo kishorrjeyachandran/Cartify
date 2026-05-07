@@ -3,7 +3,7 @@ import axios from "axios";
 const API = axios.create({
   baseURL:
     import.meta.env
-      .https://cartify-v2ua.onrender.com,
+      .VITE_API_URL,
 });
 
 export default API;
