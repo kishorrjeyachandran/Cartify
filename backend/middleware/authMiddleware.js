@@ -1,14 +1,24 @@
 import jwt from "jsonwebtoken";
 
-const protect = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+/* PROTECT */
+const protect = (
+  req,
+  res,
+  next
+) => {
+  let token;
 
   if (
-    authHeader &&
-    authHeader.startsWith("Bearer")
+    req.headers.authorization &&
+    req.headers.authorization.startsWith(
+      "Bearer"
+    )
   ) {
     try {
-      const token = authHeader.split(" ")[1];
+      token =
+        req.headers.authorization.split(
+          " "
+        )[1];
 
       const decoded = jwt.verify(
         token,
@@ -20,14 +30,40 @@ const protect = (req, res, next) => {
       next();
     } catch (error) {
       return res.status(401).json({
-        message: "Not authorized",
+        message:
+          "Not authorized",
       });
     }
-  } else {
+  }
+
+  if (!token) {
     return res.status(401).json({
-      message: "No token",
+      message:
+        "No token provided",
     });
   }
 };
 
-export { protect };
+/* ADMIN */
+const admin = (
+  req,
+  res,
+  next
+) => {
+  if (
+    req.user &&
+    req.user.role === "admin"
+  ) {
+    next();
+  } else {
+    return res.status(403).json({
+      message:
+        "Admin access only",
+    });
+  }
+};
+
+export {
+  protect,
+  admin,
+};
