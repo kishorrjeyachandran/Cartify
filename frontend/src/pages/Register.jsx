@@ -1,63 +1,83 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 
 import API from "../services/api";
 
-import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const Register = () => {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
-  const { setUser } = useAuth();
-
-  const [formData, setFormData] =
+  const [formData,
+    setFormData] =
     useState({
       name: "",
       email: "",
       password: "",
     });
 
-  const [loading, setLoading] =
+  const [loading,
+    setLoading] =
     useState(false);
 
-  const handleChange = (e) => {
+  /* INPUT CHANGE */
+  const handleChange = (
+    e
+  ) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]:
+        e.target.value,
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  /* SUBMIT */
+  const handleSubmit =
+    async (e) => {
+      e.preventDefault();
 
-    try {
-      setLoading(true);
+      try {
+        setLoading(true);
 
-      const { data } = await API.post(
-        "/auth/register",
-        formData
-      );
+        const { data } =
+          await API.post(
+            "/auth/register",
+            formData
+          );
 
-      setUser(data);
+        toast.success(
+          data.message ||
+            "OTP sent to email"
+        );
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify(data)
-      );
+        navigate(
+          "/verify-otp",
+          {
+            state: {
+              email:
+                formData.email,
+            },
+          }
+        );
+      } catch (error) {
+        console.log(error);
 
-      navigate("/");
-    } catch (error) {
-      console.log(error);
-      alert(
-        error.response?.data?.message ||
-          "Registration failed"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+        toast.error(
+          error.response?.data
+            ?.message ||
+            "Registration failed"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
     <MainLayout>
@@ -69,6 +89,7 @@ const Register = () => {
           <div className="hidden lg:flex flex-col justify-between p-12 border-r border-[#1F1F22] bg-[#0D0E10]">
             
             <div>
+              
               <div className="inline-flex items-center px-4 py-2 rounded-full border border-[#1F1F22] text-sm text-zinc-400 mb-8">
                 Join Cartify
               </div>
@@ -93,7 +114,9 @@ const Register = () => {
             
             <div className="max-w-md mx-auto">
               
+              {/* HEADER */}
               <div className="mb-10">
+                
                 <h2 className="text-4xl font-semibold tracking-tight mb-3">
                   Create Account
                 </h2>
@@ -103,12 +126,17 @@ const Register = () => {
                 </p>
               </div>
 
+              {/* FORM */}
               <form
-                onSubmit={handleSubmit}
+                onSubmit={
+                  handleSubmit
+                }
                 className="space-y-5"
               >
                 
+                {/* NAME */}
                 <div>
+                  
                   <label className="block text-sm text-zinc-400 mb-3">
                     Full Name
                   </label>
@@ -116,14 +144,20 @@ const Register = () => {
                   <input
                     type="text"
                     name="name"
-                    value={formData.name}
-                    onChange={handleChange}
+                    value={
+                      formData.name
+                    }
+                    onChange={
+                      handleChange
+                    }
                     placeholder="Enter your name"
                     className="w-full h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none focus:border-zinc-700 transition"
                   />
                 </div>
 
+                {/* EMAIL */}
                 <div>
+                  
                   <label className="block text-sm text-zinc-400 mb-3">
                     Email Address
                   </label>
@@ -131,14 +165,20 @@ const Register = () => {
                   <input
                     type="email"
                     name="email"
-                    value={formData.email}
-                    onChange={handleChange}
+                    value={
+                      formData.email
+                    }
+                    onChange={
+                      handleChange
+                    }
                     placeholder="Enter your email"
                     className="w-full h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none focus:border-zinc-700 transition"
                   />
                 </div>
 
+                {/* PASSWORD */}
                 <div>
+                  
                   <label className="block text-sm text-zinc-400 mb-3">
                     Password
                   </label>
@@ -146,15 +186,21 @@ const Register = () => {
                   <input
                     type="password"
                     name="password"
-                    value={formData.password}
-                    onChange={handleChange}
+                    value={
+                      formData.password
+                    }
+                    onChange={
+                      handleChange
+                    }
                     placeholder="Create a password"
                     className="w-full h-14 px-5 rounded-2xl bg-[#151618] border border-[#1F1F22] outline-none focus:border-zinc-700 transition"
                   />
                 </div>
 
+                {/* BUTTON */}
                 <button
                   type="submit"
+                  disabled={loading}
                   className="w-full h-14 rounded-2xl bg-white text-black font-medium hover:opacity-90 transition"
                 >
                   {loading
@@ -163,8 +209,10 @@ const Register = () => {
                 </button>
               </form>
 
+              {/* LOGIN */}
               <p className="text-zinc-500 text-sm mt-8 text-center">
                 Already have an account?{" "}
+                
                 <Link
                   to="/login"
                   className="text-white hover:underline"

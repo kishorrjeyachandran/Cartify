@@ -8,6 +8,7 @@ import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
+import VerifyOTP from "./pages/VerifyOTP";
 import Orders from "./pages/Orders";
 import AdminDashboard from "./pages/AdminDashboard";
 import Wishlist from "./pages/Wishlist";
@@ -32,6 +33,10 @@ function App() {
         path="/product/:id"
         element={<ProductDetails />}
       />
+      <Route
+  path="/verify-otp"
+  element={<VerifyOTP />}
+/>
 
       {/* CART */}
       <Route
