@@ -117,7 +117,10 @@ export const CartProvider = ({
     id
   ) => {
     setCartItems((prev) =>
-      prev.map((item) =>
+      (Array.isArray(prev)
+  ? prev
+  : []
+).map((item) =>
         item._id === id
           ? {
               ...item,

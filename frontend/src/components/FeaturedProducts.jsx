@@ -48,7 +48,8 @@ const FeaturedProducts = () => {
       {/* PRODUCTS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         
-        {products.map((product, index) => (
+        {Array.isArray(products) &&
+products.map((product, index) => (
           <motion.div
             key={product.id}
             initial={{ opacity: 0, y: 25 }}

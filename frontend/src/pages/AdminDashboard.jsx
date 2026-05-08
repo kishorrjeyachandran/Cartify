@@ -211,7 +211,8 @@ const AdminDashboard = () => {
         ) : (
           <div className="space-y-5">
             
-            {products.map((product) => (
+            {Array.isArray(products) &&
+products.map((product) => (
               <div
                 key={product._id}
                 className="flex flex-col md:flex-row md:items-center gap-5 justify-between p-5 rounded-3xl border border-[#1F1F22] bg-[#111214]"

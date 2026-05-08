@@ -83,7 +83,8 @@ const Cart = () => {
             {/* LEFT */}
             <div className="space-y-6">
               
-              {cartItems.map((item) => (
+              {Array.isArray(cartItems) &&
+cartItems.map((item) => (
                 <div
                   key={item._id}
                   className="rounded-3xl border border-[#1F1F22] bg-[#111214] p-5"

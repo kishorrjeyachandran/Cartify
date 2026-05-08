@@ -60,7 +60,8 @@ const Wishlist = () => {
         ) : (
           <div className="space-y-6">
             
-            {wishlistItems.map(
+            {Array.isArray(wishlistItems) &&
+wishlistItems.map(
               (product) => (
                 <div
                   key={product._id}

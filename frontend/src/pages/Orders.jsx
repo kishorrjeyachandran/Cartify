@@ -149,7 +149,8 @@ orders.map(
                     {Array.isArray(
   order.products
 ) &&
-  order.products.map(
+  Array.isArray(order.products) &&
+order.products.map(
                       (
                         item,
                         index

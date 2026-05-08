@@ -110,7 +110,8 @@ const Shop = () => {
   const categories = [
     "All",
     ...new Set(
-      products.map(
+      Array.isArray(products) &&
+products.map(
         (p) =>
           p.category
       )
@@ -139,7 +140,8 @@ const Shop = () => {
           {/* CATEGORIES */}
           <div className="flex flex-wrap gap-3">
             
-            {categories.map(
+            {Array.isArray(categories) &&
+categories.map(
               (cat) => (
                 <button
                   key={cat}

@@ -186,7 +186,8 @@ const Checkout = () => {
 
             body: JSON.stringify({
               products:
-                cartItems.map(
+                Array.isArray(cartItems) &&
+cartItems.map(
                   (
                     item
                   ) => ({
@@ -414,7 +415,8 @@ const Checkout = () => {
 
             <div className="space-y-5 border-b border-[#1F1F22] pb-6 mb-6">
               
-              {cartItems.map(
+              {Array.isArray(cartItems) &&
+cartItems.map(
                 (item) => (
                   <div
                     key={item._id}
