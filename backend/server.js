@@ -21,7 +21,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "https://cartify-project-o108ia9k1-kishorrjeyachandrans-projects.vercel.app/",
+    origin: "https://cartify-project-eta.vercel.app/",
     credentials: true,
   })
 );
