@@ -100,7 +100,8 @@ orders.length === 0 ? (
         ) : (
           <div className="space-y-8">
             
-            {orders.map(
+            {Array.isArray(orders) &&
+orders.map(
               (order) => (
                 <div
                   key={

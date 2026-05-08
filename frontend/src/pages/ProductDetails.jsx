@@ -395,7 +395,8 @@ const ProductDetails = () => {
             {product.reviews &&
             product.reviews.length >
               0 ? (
-              product.reviews.map(
+              Array.isArray(product.reviews) &&
+product.reviews.map(
                 (
                   review,
                   index
@@ -474,7 +475,8 @@ const ProductDetails = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             
-            {relatedProducts.map(
+            {Array.isArray(relatedProducts) &&
+relatedProducts.map(
               (item) => (
                 <div
                   key={item._id}
