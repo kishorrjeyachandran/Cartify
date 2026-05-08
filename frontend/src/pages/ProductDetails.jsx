@@ -2,7 +2,7 @@ import {
   useEffect,
   useState,
 } from "react";
-
+import API from "../services/api";
 import axios from "axios";
 
 import {
@@ -115,8 +115,8 @@ const ProductDetails = () => {
             "token"
           );
 
-        await axios.post(
-          `http://localhost:5000/api/products/${id}/reviews`,
+        await API.post(
+  `/products/${id}/reviews`,
           {
             rating,
             comment,

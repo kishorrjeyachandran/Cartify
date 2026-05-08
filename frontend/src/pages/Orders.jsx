@@ -2,7 +2,7 @@ import {
   useEffect,
   useState,
 } from "react";
-
+import API from "../services/api";
 import MainLayout from "../layouts/MainLayout";
 
 import {
@@ -28,8 +28,8 @@ const Orders = () => {
             );
 
           const res =
-            await fetch(
-              "http://localhost:5000/api/orders/my-orders",
+            await API.get(
+  "/orders/my-orders",
               {
                 headers: {
                   Authorization: `Bearer ${token}`,

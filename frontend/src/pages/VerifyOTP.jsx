@@ -1,7 +1,7 @@
 import {
   useState,
 } from "react";
-
+import API from "../services/api";
 import axios from "axios";
 
 import {
@@ -30,8 +30,8 @@ const VerifyOTP = () => {
 
     try {
       const { data } =
-        await axios.post(
-          "http://localhost:5000/api/auth/verify-otp",
+        await API.post(
+  "/auth/verify-otp",
           {
             email,
             otp,

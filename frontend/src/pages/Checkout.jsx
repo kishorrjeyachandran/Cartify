@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
-
+import API from "../services/api";
 import { useCart } from "../context/CartContext";
 
 import { useAuth } from "../context/AuthContext";
@@ -172,8 +172,8 @@ const Checkout = () => {
             "token"
           );
 
-        await fetch(
-          "http://localhost:5000/api/orders",
+        await API.post(
+  "/auth/verify-otp",
           {
             method: "POST",
 
