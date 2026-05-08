@@ -40,17 +40,28 @@ const Shop = () => {
           const data =
             await getProducts();
 
+          const safeData =
+            Array.isArray(
+              data
+            )
+              ? data
+              : [];
+
           setProducts(
-  Array.isArray(data)
-    ? data
-    : []
-);;
+            safeData
+          );
 
           setFilteredProducts(
-            data
+            safeData
           );
         } catch (error) {
           console.log(error);
+
+          setProducts([]);
+
+          setFilteredProducts(
+            []
+          );
         } finally {
           setLoading(false);
         }
@@ -62,7 +73,11 @@ const Shop = () => {
   /* FILTER + SORT */
   useEffect(() => {
     let updated =
-      [...products];
+      Array.isArray(
+        products
+      )
+        ? [...products]
+        : [];
 
     /* CATEGORY */
     if (
@@ -106,17 +121,22 @@ const Shop = () => {
     products,
   ]);
 
-  /* UNIQUE CATEGORIES */
-  const categories = [
-    "All",
-    ...new Set(
-      Array.isArray(products) &&
-products.map(
-        (p) =>
-          p.category
-      )
-    ),
-  ];
+  /* CATEGORIES */
+  const categories =
+    Array.isArray(
+      products
+    )
+      ? [
+          "All",
+
+          ...new Set(
+            products.map(
+              (p) =>
+                p.category
+            )
+          ),
+        ]
+      : ["All"];
 
   return (
     <MainLayout>
@@ -140,8 +160,7 @@ products.map(
           {/* CATEGORIES */}
           <div className="flex flex-wrap gap-3">
             
-            {Array.isArray(categories) &&
-categories.map(
+            {categories.map(
               (cat) => (
                 <button
                   key={cat}
@@ -215,8 +234,7 @@ categories.map(
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 
-                {Array.isArray(filteredProducts) &&
-filteredProducts.map(
+                {filteredProducts.map(
                   (product) => (
                     <ProductCard
                       key={
